@@ -1,0 +1,819 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jamaica Vehicle Import Calculator - Calculate Import Costs from Japan</title>
+    <meta name="description" content="Free calculator for importing vehicles from Japan to Jamaica. Calculate import duties, SCTA, GCT, shipping costs and total landed cost in JMD.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 0.5rem 0;
+        }
+
+        .nav a:hover, .nav a.active {
+            color: #667eea;
+        }
+
+        .hero {
+            padding: 2rem 0;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .main-content {
+            padding: 2rem 0 4rem 0;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .calculator-card, .content-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.875rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #f7fafc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 2rem;
+        }
+
+        .cost-breakdown {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #cbd5e0;
+            font-size: 0.95rem;
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+
+        .cost-item.highlight {
+            background: white;
+            margin: 0.5rem -1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 2px solid #667eea;
+        }
+
+        .cost-label {
+            color: #4a5568;
+        }
+
+        .cost-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .final-total {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.4);
+        }
+
+        .final-total h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.95;
+        }
+
+        .final-total .amount {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .final-total .conversions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .conversion {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .conversion-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .conversion-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-card li {
+            padding: 0.5rem 0;
+            color: #4a5568;
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+        }
+
+        .info-card li:before {
+            content: "✓";
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        .duty-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .duty-table th,
+        .duty-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .duty-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .duty-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .ad-space {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: 2px dashed #cbd5e0;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 15px;
+            margin: 2rem 0;
+            color: #718096;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .content-section {
+            margin-bottom: 2rem;
+        }
+
+        .content-section h2 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+        }
+
+        .content-section h3 {
+            color: #4a5568;
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .content-section p {
+            color: #4a5568;
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content-section ul, .content-section ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+            color: #4a5568;
+        }
+
+        .content-section li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .highlight-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .footer {
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer p {
+            opacity: 0.8;
+            margin: 0.5rem 0;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .final-total .amount {
+                font-size: 2rem;
+            }
+
+            .nav {
+                width: 100%;
+                justify-content: center;
+                margin-top: 1rem;
+                gap: 1rem;
+            }
+
+            .nav a {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🇯🇵 → 🇯🇲 Import Calculator</div>
+                <nav class="nav">
+                    <a href="#" onclick="showPage('calculator'); return false;" class="active">Calculator</a>
+                    <a href="#" onclick="showPage('guide'); return false;">Import Guide</a>
+                    <a href="#" onclick="showPage('rates'); return false;">Duty Rates</a>
+                    <a href="#" onclick="showPage('about'); return false;">About</a>
+                    <a href="#" onclick="showPage('faq'); return false;">FAQ</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- CALCULATOR PAGE (MAIN) -->
+    <div id="page-calculator" class="page active">
+        <div class="hero">
+            <div class="container">
+                <h1>Jamaica Vehicle Import Cost Calculator</h1>
+                <p>Calculate total import costs from Japan including all duties, taxes & shipping</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="container">
+                <!-- Ad Space -->
+                <div class="ad-space">
+                    📢 Advertisement Space - Google AdSense
+                </div>
+
+                <div class="calculator-card">
+                    <h2 class="section-title">🧮 Import Cost Calculator</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="vehicleType">Vehicle Type</label>
+                            <select id="vehicleType" onchange="updateEngineOptions()">
+                                <option value="motor-car-gas">Motor Car - Gasoline</option>
+                                <option value="motor-car-diesel">Motor Car - Diesel</option>
+                                <option value="pickup">Pick-up Truck - Diesel</option>
+                                <option value="hybrid">Hybrid Car</option>
+                                <option value="ev">Electric Vehicle (EV)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="engineSizeGroup">
+                            <label for="engineSize">Engine Size (Liters)</label>
+                            <select id="engineSize">
+                                <option value="1.0">1.0L</option>
+                                <option value="1.3">1.3L</option>
+                                <option value="1.5" selected>1.5L</option>
+                                <option value="2.0">2.0L</option>
+                                <option value="2.5">2.5L</option>
+                                <option value="3.0">3.0L</option>
+                                <option value="3.5">3.5L</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="purchasePrice">Purchase Price (¥ Yen)</label>
+                            <input type="number" id="purchasePrice" placeholder="e.g., 1540000" value="1540000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="shippingCost">Shipping Cost (¥ Yen)</label>
+                            <select id="shippingCost">
+                                <option value="150000">¥150,000 (20ft container)</option>
+                                <option value="160000" selected>¥160,000 (40ft container)</option>
+                                <option value="180000">¥180,000 (40ft High Cube)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn" onclick="calculateImportCost()">Calculate Total Import Cost</button>
+
+                    <div id="results" class="results hidden">
+                        <div class="cost-breakdown">
+                            <h3 class="section-title">💰 Cost Breakdown</h3>
+                            
+                            <div class="cost-item">
+                                <span class="cost-label">Purchase Price (¥)</span>
+                                <span class="cost-value" id="displayPurchase">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Shipping Cost (¥)</span>
+                                <span class="cost-value" id="displayShipping">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">Insurance (1.5%)</span>
+                                <span class="cost-value" id="displayInsurance">¥0</span>
+                            </div>
+                            <div class="cost-item highlight">
+                                <span class="cost-label">CIF Value (Cost + Insurance + Freight)</span>
+                                <span class="cost-value" id="displayCIF">¥0</span>
+                            </div>
+                        </div>
+
+                        <div class="cost-breakdown">
+                            <h3 class="section-title">📋 Jamaica Import Duties & Taxes</h3>
+                            
+                            <div class="cost-item">
+                                <span class="cost-label">Import Duty (<span id="dutyRate">20</span>%)</span>
+                                <span class="cost-value" id="displayDuty">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">SCTA (<span id="sctaRate">10</span>%)</span>
+                                <span class="cost-value" id="displaySCTA">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span class="cost-label">GCT (<span id="gctRate">15</span>%)</span>
+                                <span class="cost-value" id="displayGCT">¥0</span>
+                            </div>
+                            <div class="cost-item highlight">
+                                <span class="cost-label">Total Duties & Taxes</span>
+                                <span class="cost-value" id="displayTotalDuties">¥0</span>
+                            </div>
+                        </div>
+
+                        <div class="final-total">
+                            <h3>🎯 Total Landed Cost in Jamaica</h3>
+                            <div class="amount" id="finalJMD">J$0.00</div>
+                            <div class="conversions">
+                                <div class="conversion">
+                                    <div class="conversion-label">Japanese Yen</div>
+                                    <div class="conversion-value" id="finalJPY">¥0</div>
+                                </div>
+                                <div class="conversion">
+                                    <div class="conversion-label">US Dollars</div>
+                                    <div class="conversion-value" id="finalUSD">$0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ad Space -->
+                <div class="ad-space">
+                    📢 Advertisement Space - Google AdSense
+                </div>
+
+                <div class="calculator-card">
+                    <h2 class="section-title">📚 Quick Reference</h2>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <h3>🚢 Shipping from Japan</h3>
+                            <ul>
+                                <li>Transit time: 4-6 weeks</li>
+                                <li>Insurance: Mandatory 1.5%</li>
+                                <li>Port: Kingston, Jamaica</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-card">
+                            <h3>⚠️ Age Restrictions</h3>
+                            <ul>
+                                <li>Motor Cars: Max 5 years</li>
+                                <li>Pick-ups: Max 6 years</li>
+                                <li>EVs: Max 3 years</li>
+                            </ul>
+                        </div>
+
+                        <div class="info-card">
+                            <h3>💡 Save Money</h3>
+                            <ul>
+                                <li>Choose hybrid or EV</li>
+                                <li>Smaller engines = lower tax</li>
+                                <li>Verify age before buying</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMPORT GUIDE PAGE -->
+    <div id="page-guide" class="page">
+        <div class="hero">
+            <div class="container">
+                <h1>Jamaica Vehicle Import Guide</h1>
+                <p>Everything you need to know about importing vehicles from Japan</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="container">
+                <div class="content-card">
+                    <div class="content-section">
+                        <h2>🚢 Shipping Vehicles from Japan to Jamaica</h2>
+                        
+                        <h3>Container Shipping Options</h3>
+                        <p>There are three main container sizes for shipping vehicles:</p>
+                        <ul>
+                            <li><strong>20ft Container:</strong> ¥150,000 - Fits 1-2 small cars</li>
+                            <li><strong>40ft Container:</strong> ¥160,000 - Fits 2-3 medium cars</li>
+                            <li><strong>40ft High Cube:</strong> ¥180,000 - Fits 3-4 vehicles including larger ones</li>
+                        </ul>
+
+                        <div class="info-box">
+                            <strong>💡 Tip:</strong> Shipping multiple vehicles in one container significantly reduces per-vehicle shipping costs.
+                        </div>
+
+                        <h3>Shipping Insurance</h3>
+                        <p>Insurance is mandatory and calculated at <strong>1.5% of the vehicle's purchase price</strong>. This protects your investment during the 4-6 week transit from Japan to Jamaica.</p>
+
+                        <h3>Transit Time</h3>
+                        <ul>
+                            <li><strong>From Japan to Kingston Port:</strong> 4-6 weeks</li>
+                            <li><strong>Customs clearance:</strong> 1-3 days (after payment)</li>
+                            <li><strong>Total time:</strong> Approximately 5-7 weeks from purchase to collection</li>
+                        </ul>
+                    </div>
+
+                    <div class="content-section">
+                        <h2>📜 Import Rules & Age Restrictions</h2>
+                        
+                        <h3>Vehicle Age Limits</h3>
+                        <p>Jamaica has strict age limits for imported vehicles:</p>
+                        <ul>
+                            <li><strong>Motor Cars (Gasoline/Diesel):</strong> Maximum 5 years from year of manufacture</li>
+                            <li><strong>Pick-up Trucks:</strong> Maximum 6 years from year of manufacture</li>
+                            <li><strong>Hybrid Cars:</strong> Maximum 5 years from year of manufacture</li>
+                            <li><strong>Electric Vehicles (EV):</strong> Maximum 3 years from year of manufacture</li>
+                        </ul>
+
+                        <div class="highlight-box">
+                            <strong>⚠️ Important:</strong> Vehicles exceeding the age limit will be rejected by Jamaica Customs and cannot be imported. Always verify the manufacturing year before purchasing!
+                        </div>
+
+                        <h3>Required Documentation</h3>
+                        <ul>
+                            <li>Bill of Lading (original)</li>
+                            <li>Commercial Invoice or Pro Forma Invoice</li>
+                            <li>Import Declaration Form (C82)</li>
+                            <li>Certificate of Title or Export Certificate from Japan</li>
+                            <li>Vehicle Registration Document</li>
+                            <li>Tax Compliance Certificate (TCC)</li>
+                            <li>Valid ID (Passport or National ID)</li>
+                        </ul>
+
+                        <h3>Customs Clearance Process</h3>
+                        <ol>
+                            <li><strong>Port Arrival:</strong> Vehicle arrives at Kingston Port</li>
+                            <li><strong>Documentation Review:</strong> Customs inspects all documents (1-2 days)</li>
+                            <li><strong>Physical Inspection:</strong> Customs officers inspect vehicle</li>
+                            <li><strong>Duty Assessment:</strong> Calculation of all taxes and duties</li>
+                            <li><strong>Payment:</strong> Pay Import Duty, SCTA, and GCT</li>
+                            <li><strong>Release:</strong> Vehicle released for registration (same day after payment)</li>
+                        </ol>
+                    </div>
+
+                    <div class="content-section">
+                        <h2>💡 Pro Tips for Successful Import</h2>
+                        <ul>
+                            <li><strong>Verify Age Limit:</strong> Always check the year of manufacture against Jamaica's age restrictions before purchasing</li>
+                            <li><strong>Budget for All Costs:</strong> Include purchase + shipping + insurance + duties + taxes + registration in your total budget</li>
+                            <li><strong>Complete Documentation:</strong> Missing or incorrect documents cause delays. Ensure everything is accurate before shipping</li>
+                            <li><strong>Use Reputable Dealers:</strong> Work with established Japanese exporters who understand Jamaica's requirements</li>
+                            <li><strong>Consider Hybrid/EV:</strong> Hybrid and electric vehicles have significantly lower tax rates (up to 70% savings on duties!)</li>
+                            <li><strong>Plan for Delays:</strong> Allow extra time for customs clearance, especially during peak seasons (December-January)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Ad Space -->
+                <div class="ad-space">
+                    📢 Advertisement Space - Google AdSense
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DUTY RATES PAGE -->
+    <div id="page-rates" class="page">
+        <div class="hero">
+            <div class="container">
+                <h1>Jamaica Import Duty Rates</h1>
+                <p>Complete breakdown of import duties, SCTA, and GCT for all vehicle types</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="container">
+                <div class="content-card">
+                    <div class="content-section">
+                        <h2>🚗 Motor Cars - Gasoline Engines</h2>
+                        <table class="duty-table">
+                            <thead>
+                                <tr>
+                                    <th>Engine Size</th>
+                                    <th>Age Limit</th>
+                                    <th>Import Duty</th>
+                                    <th>SCTA</th>
+                                    <th>GCT</th>
+                                    <th>Aggregate Duty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>0.0 - 2.0L</td>
+                                    <td>5 years</td>
+                                    <td>20%</td>
+                                    <td>10%</td>
+                                    <td>15%</td>
+                                    <td>52%</td>
+                                </tr>
+                                <tr>
+                                    <td>2.0 - 3.5L</td>
+                                    <td>5 years</td>
+                                    <td>20%</td>
+                                    <td>20%</td>
+                                    <td>15%</td>
+                                    <td>66%</td>
+                                </tr>
+                                <tr>
+                                    <td>3.5L+</td>
+                                    <td>5 years</td>
+                                    <td>20%</td>
+                                    <td>20%</td>
+                                    <td>15%</td>
+                                    <td>80%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h2 style="margin-top: 2rem;">🚗 Motor Cars - Diesel Engines</h2>
+                        <table class="duty-table">
+                            <thead>
+                                <tr>
+                                    <th>Engine Size</th>
+                                    <th>Age Limit</th>
+                                    <th>Import Duty</th>
+                                    <th>SCTA</th>
+                                    <th>GCT</th>
+                                    <th>Aggregate Duty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>0.0 - 1.0L</td>
+                                    <td>5 years</td>
+                                    <td>20%</td>
+                                    <td>30%</td>
+                                    <td>15%</td>
+                                    <td>39%</td>
+                                </tr>
+                                <tr>
+                                    <td>1.0 - 2.0L</td>
+                                    <td>5 years</td>
+                                    <td>20%</td>
+                                    <td>30%</td>
+                                    <td>15%</td>
+                                    <td>52%</td>
+                                </tr>
+                                <tr>
+                                    <td>2.0L+</td>
+                                    <td>5 years</td>
+                                    <td>20%</td>
