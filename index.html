@@ -464,11 +464,11 @@
             <div class="header-content">
                 <div class="logo">🇯🇵 → 🇯🇲 Import Calculator</div>
                 <nav class="nav">
-                    <a onclick="showPage('calculator')" class="active">Calculator</a>
-                    <a onclick="showPage('guide')">Import Guide</a>
-                    <a onclick="showPage('rates')">Duty Rates</a>
-                    <a onclick="showPage('about')">About</a>
-                    <a onclick="showPage('faq')">FAQ</a>
+                    <a href="#calculator" onclick="showPage('calculator'); return false;" class="active">Calculator</a>
+                    <a href="#guide" onclick="showPage('guide'); return false;">Import Guide</a>
+                    <a href="#rates" onclick="showPage('rates'); return false;">Duty Rates</a>
+                    <a href="#about" onclick="showPage('about'); return false;">About</a>
+                    <a href="#faq" onclick="showPage('faq'); return false;">FAQ</a>
                 </nav>
             </div>
         </div>
@@ -535,7 +535,7 @@
 
                     <button class="btn" onclick="calculateImportCost()">Calculate Total Import Cost</button>
 
-                    <div id="results" class="results hidden">
+                    <div id="results" class="results">
                         <div class="cost-breakdown">
                             <h3 class="section-title">💰 Cost Breakdown</h3>
                             
