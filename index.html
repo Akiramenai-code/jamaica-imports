@@ -439,15 +439,27 @@
                                 <span id="showDuty">¥0</span>
                             </div>
                             <div class="cost-item">
-                                <span>SCTA (<span id="sctaRate">10</span>%)</span>
-                                <span id="showSCTA">¥0</span>
+                                <span>SCT (<span id="sctRate">10</span>%)</span>
+                                <span id="showSCT">¥0</span>
                             </div>
                             <div class="cost-item">
-                                <span>GCT (<span id="gctRate">15</span>%)</span>
+                                <span>Environmental Levy (0.5%)</span>
+                                <span id="showEnvLevy">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span>Standard Compliance Fee (0.3%)</span>
+                                <span id="showSCF">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span>Customs Admin Fee (1%)</span>
+                                <span id="showCAF">¥0</span>
+                            </div>
+                            <div class="cost-item">
+                                <span>GCT (17.5%)</span>
                                 <span id="showGCT">¥0</span>
                             </div>
                             <div class="cost-item highlight">
-                                <span>Total Duties</span>
+                                <span>Total Duties & Taxes</span>
                                 <span id="showTotalDuties">¥0</span>
                             </div>
                         </div>
@@ -757,13 +769,13 @@
         function getRates(type, engine) {
             const e = parseFloat(engine);
             const rates = {
-                'motor-car-gas': e <= 2.0 ? {d:0.20, s:0.10, g:0.15} : e <= 3.5 ? {d:0.20, s:0.20, g:0.15} : {d:0.20, s:0.20, g:0.15},
-                'motor-car-diesel': e <= 1.0 ? {d:0.20, s:0.30, g:0.15} : e <= 2.0 ? {d:0.20, s:0.30, g:0.15} : {d:0.20, s:0.20, g:0.15},
-                'pickup': e <= 1.0 ? {d:0.20, s:0.20, g:0.15} : e <= 2.0 ? {d:0.20, s:0.40, g:0.15} : {d:0.20, s:0.00, g:0.15},
-                'hybrid': {d:0.20, s:0.15, g:0.15},
-                'ev': {d:0.10, s:0.00, g:0.00}
+                'motor-car-gas': e <= 2.0 ? {d:0.20, s:0.10} : e <= 3.5 ? {d:0.20, s:0.20} : {d:0.20, s:0.20},
+                'motor-car-diesel': e <= 1.0 ? {d:0.20, s:0.30} : e <= 2.0 ? {d:0.20, s:0.30} : {d:0.20, s:0.20},
+                'pickup': e <= 1.0 ? {d:0.20, s:0.20} : e <= 2.0 ? {d:0.20, s:0.40} : {d:0.20, s:0.00},
+                'hybrid': {d:0.20, s:0.15},
+                'ev': {d:0.10, s:0.00}
             };
-            return rates[type] || {d:0.20, s:0.10, g:0.15};
+            return rates[type] || {d:0.20, s:0.10};
         }
 
         function fmt(val, cur = 'JMD') {
@@ -779,13 +791,31 @@
 
             if (price === 0) { alert('Enter purchase price'); return; }
 
+            // Step 1: CIF Value
             const ins = price * 0.015;
             const cif = price + ship + ins;
+            
+            // Step 2: Import Duty (on CIF)
             const r = getRates(type, engine);
             const duty = cif * r.d;
-            const scta = (cif + duty) * r.s;
-            const gct = (cif + duty + scta) * r.g;
-            const totalDuties = duty + scta + gct;
+            
+            // Step 3: SCT (on CIF + Import Duty)
+            const sct = (cif + duty) * r.s;
+            
+            // Step 4: Environmental Levy (0.5% of CIF only)
+            const envLevy = cif * 0.005;
+            
+            // Step 5: Standard Compliance Fee (0.3% of CIF)
+            const scf = cif * 0.003;
+            
+            // Step 6: Customs Admin Fee (1% of CIF)
+            const caf = cif * 0.01;
+            
+            // Step 7: GCT (17.5% on everything above)
+            const gctBase = cif + duty + sct + envLevy + scf + caf;
+            const gct = type === 'ev' ? 0 : gctBase * 0.175;
+            
+            const totalDuties = duty + sct + envLevy + scf + caf + gct;
             const totalJPY = cif + totalDuties;
             const totalJMD = totalJPY * RATES.JPY_TO_JMD;
             const totalUSD = totalJPY / RATES.USD_TO_JPY;
@@ -796,11 +826,13 @@
             document.getElementById('showCIF').textContent = fmt(cif, 'JPY');
             
             document.getElementById('dutyRate').textContent = (r.d * 100).toFixed(0);
-            document.getElementById('sctaRate').textContent = (r.s * 100).toFixed(0);
-            document.getElementById('gctRate').textContent = (r.g * 100).toFixed(0);
+            document.getElementById('sctRate').textContent = (r.s * 100).toFixed(0);
             
             document.getElementById('showDuty').textContent = fmt(duty, 'JPY');
-            document.getElementById('showSCTA').textContent = fmt(scta, 'JPY');
+            document.getElementById('showSCT').textContent = fmt(sct, 'JPY');
+            document.getElementById('showEnvLevy').textContent = fmt(envLevy, 'JPY');
+            document.getElementById('showSCF').textContent = fmt(scf, 'JPY');
+            document.getElementById('showCAF').textContent = fmt(caf, 'JPY');
             document.getElementById('showGCT').textContent = fmt(gct, 'JPY');
             document.getElementById('showTotalDuties').textContent = fmt(totalDuties, 'JPY');
             
